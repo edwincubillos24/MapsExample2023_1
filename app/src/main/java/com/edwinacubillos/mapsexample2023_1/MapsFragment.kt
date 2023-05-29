@@ -1,11 +1,15 @@
 package com.edwinacubillos.mapsexample2023_1
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -15,6 +19,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsFragment : Fragment() {
+
+    private lateinit var mMap: GoogleMap
 
     private val callback = OnMapReadyCallback { googleMap ->
         /**
@@ -27,18 +33,39 @@ class MapsFragment : Fragment() {
          * user has installed Google Play services and returned to the app.
          */
         val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+        mMap = googleMap
+
+        setUpMap()
+
+        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
 
         val udea = LatLng(6.2691952, -75.5700196)
-        googleMap.addMarker(MarkerOptions()
+        mMap.addMarker(MarkerOptions()
             .position(udea)
             .title("Udea")
             .snippet("Alma Mater"))
 
-        googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(udea,18.0F))
+        mMap.mapType = GoogleMap.MAP_TYPE_HYBRID
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(udea,18.0F))
+
+    }
+
+    private fun setUpMap() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                requireContext() as Activity,
+                arrayOf (Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            return
+        }
+        mMap.isMyLocationEnabled = true
     }
 
     override fun onCreateView(inflater: LayoutInflater,container: ViewGroup?,savedInstanceState: Bundle?): View? {
